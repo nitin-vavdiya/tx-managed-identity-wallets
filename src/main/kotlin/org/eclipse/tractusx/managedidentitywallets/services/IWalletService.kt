@@ -20,6 +20,7 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -206,6 +207,7 @@ interface IWalletService {
                 install(JsonFeature) {
                     serializer = JacksonSerializer {
                         enable(SerializationFeature.INDENT_OUTPUT)
+                        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                         serializationConfig.defaultPrettyPrinter
                         setSerializationInclusion(JsonInclude.Include.NON_NULL)
                     }

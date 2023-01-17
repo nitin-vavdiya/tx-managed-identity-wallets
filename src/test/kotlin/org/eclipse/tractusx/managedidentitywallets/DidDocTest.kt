@@ -244,6 +244,12 @@ class DidDocTest {
             }
             assertTrue { notImplException.message!!.contains("Service type UnknownType is not supported") }
 
+            val canResolveWebDid = EnvironmentTestSetup.utilsService.isDidResolvable("did:web:example.com")
+            assertTrue { canResolveWebDid }
+
+            val canResolveInvalidWebDid = EnvironmentTestSetup.utilsService.isDidResolvable("did:web3:example.com")
+            assertFalse { canResolveInvalidWebDid }
+
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)
