@@ -353,8 +353,15 @@ class AcaPyWalletServiceImpl(
         var token: String? = null
         val modifiedDid: String
         if (utilsService.isDID(identifier)) {
-            utilsService.checkIndyDid(identifier)
-            modifiedDid = utilsService.replaceNetworkIdentifierWithSov(identifier)
+            if (utilsService.isDidResolvable(identifier)) {
+                modifiedDid = utilsService.replaceNetworkIdentifierWithSov(identifier)
+            } else {
+                throw UnprocessableEntityException("The DID must be a valid and resolvable supported DID: " +
+                        "${utilsService.getDidMethodPrefixWithNetworkIdentifier()}" +
+                        " or ${utilsService.getOldDidMethodPrefixWithNetworkIdentifier()}" +
+                        " or did:web"
+                )
+            }
         } else {
             val walletData = getWalletExtendedInformation(identifier)
             token = walletData.walletToken

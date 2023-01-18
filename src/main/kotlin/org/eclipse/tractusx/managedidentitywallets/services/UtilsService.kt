@@ -33,6 +33,10 @@ class UtilsService(private val networkIdentifier: String) {
 
     fun isDID(identifier: String) : Boolean = identifier.startsWith("did:")
 
+    fun isDidResolvable(did: String): Boolean {
+        return isIndyDid(did) || isWebDid(did)
+    }
+
     fun createRandomString(): String {
         return (1..25)
             .map { SecureRandom().nextInt(charPool.size) }
@@ -81,10 +85,19 @@ class UtilsService(private val networkIdentifier: String) {
         return input.replace(":indy:$networkIdentifier:", ":sov:")
     }
 
-    fun checkIndyDid(did: String) {
+    private fun isWebDid(did: String): Boolean  {
+        val regex = """^did:web:.*""".toRegex()
+        return regex.matches(did)
+    }
+
+    private fun isIndyDid(did: String): Boolean  {
         // allow old and new DID methods to accomodate migrated scenarios
         val regex = """(${getDidMethodPrefixWithNetworkIdentifier()}|${getOldDidMethodPrefixWithNetworkIdentifier()}).[^-\s]{16,}${'$'}""".toRegex()
-        if (!regex.matches(did)) {
+        return regex.matches(did)
+    }
+
+    fun checkIndyDid(did: String) {
+        if (!isIndyDid(did)) {
             throw UnprocessableEntityException("The DID must be a valid and supported DID: ${getDidMethodPrefixWithNetworkIdentifier()} or ${getOldDidMethodPrefixWithNetworkIdentifier()}")
         }
     }
