@@ -12,6 +12,7 @@ services:
       PGDATA: /data/postgres-data
     volumes:
       - postgres-data:/data/postgres-data
+    # command: ["-c", "logging_collector=on", "-c", "log_statement=all", "-c", "log_min_duration_statement=0"]
     ports:
       - "5432:5432"
 

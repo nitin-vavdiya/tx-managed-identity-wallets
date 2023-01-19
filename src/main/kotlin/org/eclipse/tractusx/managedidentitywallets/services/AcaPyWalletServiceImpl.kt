@@ -356,10 +356,11 @@ class AcaPyWalletServiceImpl(
             if (utilsService.isDidResolvable(identifier)) {
                 modifiedDid = utilsService.replaceNetworkIdentifierWithSov(identifier)
             } else {
-                throw UnprocessableEntityException("The DID must be a valid and resolvable supported DID: " +
-                        "${utilsService.getDidMethodPrefixWithNetworkIdentifier()}" +
-                        " or ${utilsService.getOldDidMethodPrefixWithNetworkIdentifier()}" +
-                        " or did:web"
+                throw UnprocessableEntityException(
+                    "The DID must be a valid and resolvable supported DID: " +
+                            "${utilsService.getDidMethodPrefixWithNetworkIdentifier()} " +
+                            "or ${utilsService.getOldDidMethodPrefixWithNetworkIdentifier()} " +
+                            "or did:web"
                 )
             }
         } else {
@@ -592,8 +593,7 @@ class AcaPyWalletServiceImpl(
             validateRevocation(vc, walletToken)
         }
         val verifyReq = VerifyRequest(
-            signedDoc = vc,
-            verkey = getVerKeyOfVerificationMethodId(vc.issuer, vc.proof.verificationMethod)
+            signedDoc = vc
         )
         var isValid = true
         var message = ""
@@ -619,14 +619,8 @@ class AcaPyWalletServiceImpl(
         if (vpDto.proof == null) {
             throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing proof")
         }
-        val didOfVpSigner = if (vpDto.holder.isNullOrEmpty()) {
-            vpDto.proof.verificationMethod.split("#").first()
-        } else {
-            vpDto.holder
-        }
         val verifyVPReq = VerifyRequest(
-            signedDoc = vpDto,
-            verkey = getVerKeyOfVerificationMethodId(didOfVpSigner, vpDto.proof.verificationMethod)
+            signedDoc = vpDto
         )
         var isValid = true
         var message = ""
@@ -643,18 +637,6 @@ class AcaPyWalletServiceImpl(
         if (!isValid) {
             throw UnprocessableEntityException("Verifiable presentation is not valid.$message")
         }
-    }
-
-    private suspend fun getVerKeyOfVerificationMethodId(did: String, verificationMethodId: String): String {
-        val didDocumentDto = resolveDocument(did)
-        if (didDocumentDto.verificationMethods.isNullOrEmpty()) {
-            throw UnprocessableEntityException("The DID Doc has no verification methods")
-        }
-        val verificationMethod = didDocumentDto.verificationMethods.find {
-                method -> method.id == verificationMethodId
-        } ?: throw UnprocessableEntityException("Verification method with given Id " +
-                "$verificationMethodId does not exist")
-        return getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
     }
 
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
