@@ -19,8 +19,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import com.google.gson.GsonBuilder
 import foundation.identity.jsonld.JsonLDUtils
+import io.bkbn.kompendium.oas.serialization.KompendiumSerializersModule
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -79,6 +79,7 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallet
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
+import org.eclipse.tractusx.managedidentitywallets.plugins.VerifiableCredentialDtoSerializer
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
@@ -106,7 +107,14 @@ class AcaPyWalletServiceImpl(
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
-        private val gson = GsonBuilder().create()
+        private val json = Json {
+            isLenient = false
+            encodeDefaults = true
+            classDiscriminator = "class"
+            serializersModule = KompendiumSerializersModule.module
+            explicitNulls = false
+            ignoreUnknownKeys = true
+        }
     }
 
     override fun getWallet(identifier: String, withCredentials: Boolean): WalletDto {
@@ -313,8 +321,7 @@ class AcaPyWalletServiceImpl(
         log.debug("Store Credential in Wallet with identifier $identifier")
         return transaction {
             val extractedWallet = walletRepository.getWallet(identifier)
-            val credentialAsJson =
-                Json.encodeToString(IssuedVerifiableCredentialRequestDto.serializer(), issuedCredential)
+            val credentialAsJson = json.encodeToString(IssuedVerifiableCredentialRequestDto.serializer(), issuedCredential)
             issuedCredential.type.map { }
             val listOfTypes = issuedCredential.type.sorted().toMutableList()
             if (listOfTypes.size > 1) {
@@ -413,9 +420,9 @@ class AcaPyWalletServiceImpl(
             modifiedDid = utilsService.replaceNetworkIdentifierWithSov(walletData.did)
         }
         val didDocResult = acaPyService.resolveDidDoc(modifiedDid, token)
-        val resolutionResultAsJson = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
+        val resolutionResultAsJson = json.encodeToString(ResolutionResult.serializer(), didDocResult)
         val res: ResolutionResult =
-            Json.decodeFromString(utilsService.replaceSovWithNetworkIdentifier(resolutionResultAsJson))
+            json.decodeFromString(utilsService.replaceSovWithNetworkIdentifier(resolutionResultAsJson))
         return res.didDoc
     }
 
@@ -472,7 +479,7 @@ class AcaPyWalletServiceImpl(
             verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
         )
         val signedVpAsJsonString = acaPyService.signJsonLd(signRequest, token)
-        val signedVpResult: SignPresentationResponse = Json.decodeFromString(signedVpAsJsonString)
+        val signedVpResult: SignPresentationResponse = json.decodeFromString(signedVpAsJsonString)
         if (signedVpResult.signedDoc != null) {
             return signedVpResult.signedDoc
         }
@@ -778,7 +785,7 @@ class AcaPyWalletServiceImpl(
             verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
         )
         val signedVcResultAsJsonString = acaPyService.signJsonLd(signRequest, issuerWalletData.walletToken)
-        return Json.decodeFromString(signedVcResultAsJsonString)
+        return json.decodeFromString(signedVcResultAsJsonString)
     }
 
     override suspend fun revokeVerifiableCredential(vc: VerifiableCredentialDto) {
@@ -939,12 +946,15 @@ class AcaPyWalletServiceImpl(
                 } else {
                     extractedWallet.did
                 }
-
+                val credentialAsJson = String(
+                        Base64.getDecoder().decode(credExRecord.credIssue.credentialsTildeAttach[0].data.base64),
+                        Charsets.UTF_8
+                    )
                 credentialRepository.storeCredential(
                     issuedCredentialId = credentialId,
                     issuerOfCredential = verifiableCredential.issuer!!,
                     holderOfCredential = idOfSubject,
-                    credentialAsJson = gson.toJson(credExRecord.resolveLDCredential().credential),
+                    credentialAsJson = credentialAsJson,
                     typesAsString = types,
                     holderWallet = extractedWallet
                 )
