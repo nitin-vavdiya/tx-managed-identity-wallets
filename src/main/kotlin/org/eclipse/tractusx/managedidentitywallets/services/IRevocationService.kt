@@ -100,9 +100,9 @@ interface IRevocationService {
                 HttpClient {
                     expectSuccess = true
                     install(HttpTimeout) {
-                        requestTimeoutMillis = 30000
-                        connectTimeoutMillis = 30000
-                        socketTimeoutMillis = 30000
+                        requestTimeoutMillis = 60000
+                        connectTimeoutMillis = 60000
+                        socketTimeoutMillis = 60000
                     }
                     install(ResponseObserver) {
                         onResponse { response ->
