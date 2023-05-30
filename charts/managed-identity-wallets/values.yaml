@@ -25,7 +25,6 @@ allowEmptyPassword: "\"yes\""
 db:
   # -- Database driver to use
   jdbcDriver: "org.postgresql.Driver"
-namespace: "managed-identity-wallets"
 # -- The logging configurations
 logging:
   exposed: "INFO"
@@ -169,7 +168,7 @@ ingress:
 acapypostgresql:
   enabled: true
   auth:
-    existingSecret: product-managed-identity-wallets-acapypostgresql
+    existingSecret: managed-identity-wallets-acapypostgresql
   secret:
     password: "postgres"
     postgrespassword: "postgres"
@@ -180,7 +179,7 @@ postgresql:
   useDefaultJdbcUrl: true
   enabled: true
   auth:
-    existingSecret: product-managed-identity-wallets-postgresql
+    existingSecret: managed-identity-wallets-postgresql
   primary:
     extraVolumeMounts:
       - name: initdb
