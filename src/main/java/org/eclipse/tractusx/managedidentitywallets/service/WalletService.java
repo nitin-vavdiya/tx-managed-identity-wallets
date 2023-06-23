@@ -31,13 +31,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
-import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -51,12 +44,11 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProb
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
-import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
+import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
+import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
-import org.eclipse.tractusx.ssi.lib.model.base.MultibaseFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
@@ -66,11 +58,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -215,19 +205,16 @@ public class WalletService extends BaseService<Wallet, Long> {
 
 
         //create private key pair
-        Ed25519KeySet keyPair = createKeyPair();
+        IKeyGenerator keyGenerator = new x21559Generator();
+        KeyPair keyPair = keyGenerator.generateKey();
+//        Ed25519KeySet keyPair = createKeyPair();
 
         //create did json
         Did did = DidWebFactory.fromHostname(miwSettings.host() + ":" + request.getBpn());
 
-        //Extracting keys
-        Ed25519Key privateKey = Ed25519Key.asPrivateKey(keyPair.getPrivateKey());
-        Ed25519Key publicKey = Ed25519Key.asPublicKey(keyPair.getPublicKey());
-        MultibaseString publicKeyBase = MultibaseFactory.create(publicKey.getEncoded());
-
         //Building Verification Methods:
         // JWK
-        JsonWebKey jwk = JsonWebKey.fromED21559("", publicKey.getEncoded(), privateKey.getEncoded());
+        JsonWebKey jwk = new JsonWebKey("", keyPair.getPublicKey(), keyPair.getPrivateKey());
         JWKVerificationMethod jwkVerificationMethod =
                 new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
@@ -252,8 +239,8 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .walletId(wallet.getId())
                 .referenceKey("dummy ref key")  //TODO removed once vault setup is ready
                 .vaultAccessToken("dummy vault access token") ////TODO removed once vault setup is ready
-                .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey())))
-                .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey())))
+                .privateKey(encryptionUtils.encrypt(keyPair.getPrivateKey().asStringForStoring()))
+                .publicKey(encryptionUtils.encrypt(keyPair.getPrivateKey().asStringForStoring()))
                 .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
 
@@ -289,42 +276,6 @@ public class WalletService extends BaseService<Wallet, Long> {
             throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
         }
 
-    }
-
-    @SneakyThrows
-    private Ed25519KeySet createKeyPair() {
-        SecureRandom secureRandom = new SecureRandom();
-
-        Ed25519KeyPairGenerator keyPairGenerator = new Ed25519KeyPairGenerator();
-        keyPairGenerator.init(new Ed25519KeyGenerationParameters(secureRandom));
-
-        AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
-        Ed25519PrivateKeyParameters privateKey = (Ed25519PrivateKeyParameters) keyPair.getPrivate();
-        Ed25519PublicKeyParameters publicKey = (Ed25519PublicKeyParameters) keyPair.getPublic();
-
-        byte[] privateKeyBytes = privateKey.getEncoded();
-        byte[] publicKeyBytes = publicKey.getEncoded();
-        return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
-    }
-
-    @SneakyThrows
-    private String getPrivateKeyString(byte[] privateKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PRIVATE KEY", privateKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
-
-    @SneakyThrows
-    private String getPublicKeyString(byte[] publicKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
     }
 
 }

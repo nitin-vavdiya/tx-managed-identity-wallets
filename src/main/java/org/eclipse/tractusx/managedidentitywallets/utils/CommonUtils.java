@@ -21,8 +21,10 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.ssi.lib.crypt.IPrivateKey;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -65,15 +67,15 @@ public class CommonUtils {
     /**
      * Gets credential.
      *
-     * @param subject         the subject
-     * @param types           the types
-     * @param issuerDoc       the issuer doc
-     * @param privateKeyBytes the private key bytes
-     * @param holderDid       the holder did
+     * @param subject    the subject
+     * @param types      the types
+     * @param issuerDoc  the issuer doc
+     * @param privateKey the private key bytes
+     * @param holderDid  the holder did
      * @return the credential
      */
     public static HoldersCredential getHoldersCredential(Map<String, Object> subject, List<String> types, DidDocument issuerDoc,
-                                                         byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate, boolean selfIssued) {
+                                                         IPrivateKey privateKey, String holderDid, List<String> contexts, Date expiryDate, boolean selfIssued) {
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
                 new VerifiableCredentialSubject(subject);
@@ -83,7 +85,7 @@ public class CommonUtils {
 
         // Create VC
         VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, types,
-                verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
+                verifiableCredentialSubject, privateKey, contexts, expiryDate);
 
             cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
 
@@ -99,9 +101,10 @@ public class CommonUtils {
     }
 
 
+    @SneakyThrows
     private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
                                                                    VerifiableCredentialSubject verifiableCredentialSubject,
-                                                                   byte[] privateKey, List<String> contexts, Date expiryDate) {
+                                                                   IPrivateKey privateKey, List<String> contexts, Date expiryDate) {
         //VC Builder
         VerifiableCredentialBuilder builder =
                 new VerifiableCredentialBuilder()

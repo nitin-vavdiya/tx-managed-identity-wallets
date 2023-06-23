@@ -39,6 +39,7 @@ import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundP
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.crypt.IPrivateKey;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -153,12 +154,12 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+        IPrivateKey privateKey = walletKeyService.getPrivateKeyByWalletIdentifier(issuerWallet.getId());
 
         // Create Credential
         HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
-                privateKeyBytes, issuerWallet.getDid(),
+                privateKey, issuerWallet.getDid(),
                 verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), true);
 
         //Store Credential in holder table

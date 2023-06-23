@@ -27,14 +27,12 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
+import org.eclipse.tractusx.ssi.lib.crypt.IPrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.springframework.stereotype.Service;
-
-import java.io.StringReader;
 
 /**
  * The type Wallet key service.
@@ -60,31 +58,11 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
         return specificationUtil;
     }
 
-
-    /**
-     * Get private key by wallet identifier as bytes byte [ ].
-     *
-     * @param walletId the wallet id
-     * @return the byte [ ]
-     */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
-        return getPrivateKeyByWalletIdentifier(walletId).getEncoded();
-    }
-
-    /**
-     * Gets private key by wallet identifier.
-     *
-     * @param walletId the wallet id
-     * @return the private key by wallet identifier
-     */
-    @SneakyThrows
-
-    public Ed25519Key getPrivateKeyByWalletIdentifier(long walletId) {
+    public IPrivateKey getPrivateKeyByWalletIdentifier(long walletId) {
         WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
-        byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
-        return Ed25519Key.asPrivateKey(content);
+        return new x21559PrivateKey(privateKey, true);
     }
 
 }
