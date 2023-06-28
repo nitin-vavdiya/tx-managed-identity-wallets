@@ -158,6 +158,7 @@ class WalletTest {
                 .filter(vp -> vp.getTypes().contains(MIWVerifiableCredentialType.BPN_CREDENTIAL))
                 .findFirst()
                 .orElse(null);
+        Assertions.assertNotNull(verifiableCredential);
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.BPN), wallet.getBpn());
         Assertions.assertEquals(MIWVerifiableCredentialType.BPN_CREDENTIAL, verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE));
@@ -165,6 +166,7 @@ class WalletTest {
         VerifiableCredential summaryVerifiableCredential = body.getVerifiableCredentials().stream()
                 .filter(vc -> vc.getTypes().contains(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL)).findFirst()
                 .orElse(null);
+        Assertions.assertNotNull(summaryVerifiableCredential);
         VerifiableCredentialSubject subject = summaryVerifiableCredential.getCredentialSubject().get(0);
         List<String> list = (List<String>) subject.get(StringPool.ITEMS);
         Assertions.assertTrue(list.contains(MIWVerifiableCredentialType.BPN_CREDENTIAL));
@@ -463,8 +465,7 @@ class WalletTest {
         Map<String, Objects> map = objectMapper.readValue(vc.replace("##did", did), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, HttpMethod.POST, entity, Map.class, bpn);
-        return response;
+        return restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, HttpMethod.POST, entity, Map.class, bpn);
     }
 
     private ResponseEntity<Map> storeCredential(String bpn, String did) throws JsonProcessingException {

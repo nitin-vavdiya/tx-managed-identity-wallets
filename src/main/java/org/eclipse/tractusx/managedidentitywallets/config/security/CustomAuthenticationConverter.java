@@ -20,6 +20,8 @@
  */
 
 package org.eclipse.tractusx.managedidentitywallets.config.security;
+
+import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +31,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,7 +54,10 @@ public class CustomAuthenticationConverter implements Converter<Jwt, AbstractAut
     }
 
     @Override
-    public AbstractAuthenticationToken convert(Jwt source) {
+    public AbstractAuthenticationToken convert(@Nullable Jwt source) {
+        if (Objects.isNull(source)) {
+            throw new ForbiddenException("access token can not be null");
+        }
         Collection<GrantedAuthority> convert = grantedAuthoritiesConverter.convert(source);
         if (!CollectionUtils.isEmpty(convert)) {
             Collection<GrantedAuthority> authorities = new HashSet<>(convert);
@@ -65,6 +71,7 @@ public class CustomAuthenticationConverter implements Converter<Jwt, AbstractAut
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt, String resourceId) {
         Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+
         Map<String, Object> resource = (Map<String, Object>) resourceAccess.get(resourceId);
         if (Objects.isNull(resource)) {
             return Set.of();

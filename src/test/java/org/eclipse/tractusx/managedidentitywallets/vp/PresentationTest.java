@@ -83,7 +83,7 @@ class PresentationTest {
 
 
     @Test
-    void validateVPAssJsonLd400() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
+    void validateVPAssJsonLd400() throws JsonProcessingException {
         //create VP
         String bpn = UUID.randomUUID().toString();
         String audience = "smartSense";
@@ -100,7 +100,7 @@ class PresentationTest {
 
 
     @Test
-    void validateVPAsJwt() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
+    void validateVPAsJwt() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException {
         String bpn = UUID.randomUUID().toString();
         String audience = "smartSense";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
@@ -115,6 +115,7 @@ class PresentationTest {
             ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, null, true, false);
 
             Map map = mapResponseEntity.getBody();
+            Assertions.assertNotNull(map);
 
             Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
             Assertions.assertFalse(map.containsKey(StringPool.VALIDATE_AUDIENCE));
@@ -142,6 +143,7 @@ class PresentationTest {
             ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, "no valid", true, true);
 
             Map map = mapResponseEntity.getBody();
+            Assertions.assertNotNull(map);
 
             Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
             Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALIDATE_AUDIENCE).toString()));
@@ -168,6 +170,7 @@ class PresentationTest {
             ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, audience, true, true);
 
             Map map = mapResponseEntity.getBody();
+            Assertions.assertNotNull(map);
 
             Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
             Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALIDATE_AUDIENCE).toString()));
@@ -183,6 +186,7 @@ class PresentationTest {
         String audience = "smartSense";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.CREATED.value());
+        Assertions.assertNotNull(vpResponse.getBody());
         String jwt = vpResponse.getBody().get("vp").toString();
         SignedJWT signedJWT = SignedJWT.parse(jwt);
         JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
@@ -202,8 +206,7 @@ class PresentationTest {
 
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
 
-        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, audience);
-        return vpResponse;
+        return restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, audience);
     }
 
 

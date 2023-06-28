@@ -64,7 +64,7 @@ To check the coverage run the command
 ./gradlew jacocoTestCoverageVerification
 ```
 
-Currently the minimum is 80%
+Currently, the minimum is 80%
 
 ## Common issues and solutions during local setup
 
@@ -125,7 +125,7 @@ This process ensures that any issues with the database schema are resolved by re
 
 ## Technical Debts and Known issue
 
-1. Keys are stored in database in encrypted format, need to store keys in more secure place ie. Vault
+1. Keys are stored in database in encrypted format, need to store keys in more secure place i.e. Vault
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)

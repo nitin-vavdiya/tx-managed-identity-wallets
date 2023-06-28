@@ -93,7 +93,7 @@ class DismantlerHoldersCredentialTest {
 
 
     @Test
-    void issueDismantlerCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
+    void issueDismantlerCredentialToBaseWalletTest201() throws JSONException {
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
         ResponseEntity<String> response = issueDismantlerCredential(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
@@ -121,6 +121,7 @@ class DismantlerHoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
         ObjectMapper objectMapper = new ObjectMapper();
+
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL));

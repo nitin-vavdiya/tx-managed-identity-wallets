@@ -136,7 +136,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type,
+                                                         String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
         filterRequest.setSize(size);
         filterRequest.setPage(pageNumber);

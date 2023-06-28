@@ -27,7 +27,6 @@ package org.eclipse.tractusx.managedidentitywallets.constant;
 public class StringPool {
 
     public static final String CREDENTIAL_ID = "credentialId";
-    public static final String VALUE = "value";
     public static final String CONTRACT_VERSION = "contractVersion";
     public static final String ACTIVITY_TYPE = "activityType";
     public static final String ALLOWED_VEHICLE_BRANDS = "allowedVehicleBrands";
@@ -47,7 +46,6 @@ public class StringPool {
     public static final String ISSUER_DID = "issuerDid";
     public static final String HOLDER_DID = "holderDid";
     public static final String HOLDER_IDENTIFIER = "holderIdentifier";
-    public static final String NAME = "name";
     public static final String CONTRACT_TEMPLATES = "contractTemplates";
     public static final String CONTRACT_TEMPLATE = "contractTemplate";
     public static final String TYPE = "type";
@@ -68,7 +66,6 @@ public class StringPool {
      */
     public static final String BPN = "bpn";
 
-    public static final String BPN_UPPER_CASE = "BPN";
 
     public static final String ID = "id";
 

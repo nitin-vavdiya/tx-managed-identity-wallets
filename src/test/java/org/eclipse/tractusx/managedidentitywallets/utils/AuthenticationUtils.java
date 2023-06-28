@@ -34,7 +34,6 @@ import org.springframework.http.HttpHeaders;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 public class AuthenticationUtils {
 
@@ -51,9 +50,6 @@ public class AuthenticationUtils {
         return getJwtToken(StringPool.INVALID_USER_NAME);
     }
 
-    public static String getInvalidToken() {
-        return UUID.randomUUID().toString();
-    }
 
     @NotNull
     public static HttpHeaders getInvalidUserHttpHeaders() {

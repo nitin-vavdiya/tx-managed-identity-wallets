@@ -212,12 +212,11 @@ class HoldersCredentialTest {
 
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
-            utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
-            }).thenReturn(mock);
+            utils.when(() -> LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class))).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
+            Assertions.assertNotNull(stringObjectMap);
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -235,12 +234,11 @@ class HoldersCredentialTest {
 
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
-            utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
-            }).thenReturn(mock);
+            utils.when(() -> LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class))).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
+            Assertions.assertNotNull(stringObjectMap);
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -251,9 +249,8 @@ class HoldersCredentialTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         TestUtils.createWallet(bpn, "Test", restTemplate);
         ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
-        Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
-        return map;
+        VerifiableCredential verifiableCredential = new VerifiableCredential(objectMapper.readValue(vc.getBody(), Map.class));
+        return objectMapper.readValue(verifiableCredential.toJson(), Map.class);
     }
 
 
@@ -284,7 +281,6 @@ class HoldersCredentialTest {
 
         Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS, HttpMethod.POST, entity, String.class);
-        return response;
+        return restTemplate.exchange(RestURI.CREDENTIALS, HttpMethod.POST, entity, String.class);
     }
 }

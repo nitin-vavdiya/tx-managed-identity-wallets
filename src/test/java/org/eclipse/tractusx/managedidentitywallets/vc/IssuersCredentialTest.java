@@ -129,9 +129,7 @@ class IssuersCredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
 
         //all VC must be type of MEMBERSHIP_CREDENTIAL_CX
-        credentialList.forEach(vc -> {
-            Assertions.assertTrue(vc.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
-        });
+        credentialList.forEach(vc -> Assertions.assertTrue(vc.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL)));
 
         list = new ArrayList<>();
         list.add(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
@@ -179,6 +177,7 @@ class IssuersCredentialTest {
         ResponseEntity<String> response = issueVC(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), type, headers);
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
 
@@ -212,6 +211,7 @@ class IssuersCredentialTest {
         ResponseEntity<String> response = issueVC(bpn, did, miwSettings.authorityWalletDid(), type, headers);
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
 

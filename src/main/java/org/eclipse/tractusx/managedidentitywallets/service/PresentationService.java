@@ -102,6 +102,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      */
     @SneakyThrows({InvalidePrivateKeyFormat.class})
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
+
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
         //only support one credential at a time to create VP

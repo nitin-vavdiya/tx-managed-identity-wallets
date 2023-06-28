@@ -78,8 +78,8 @@ class FrameworkHoldersCredentialTest {
     @Autowired
     private IssuersCredentialRepository issuersCredentialRepository;
 
-    private static int count = 0;
-
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void issueFrameworkCredentialTest403() {
@@ -97,7 +97,7 @@ class FrameworkHoldersCredentialTest {
 
 
     @Test
-    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JSONException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -115,7 +115,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "PcfCredential";
         //create wallet
@@ -172,7 +172,7 @@ class FrameworkHoldersCredentialTest {
 
     @Test
     @DisplayName("Issue framework with invalid type")
-    void issueFrameworkCredentialTest400() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialTest400() throws JSONException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
@@ -210,7 +210,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     private void validate(Wallet wallet, String type, ResponseEntity<String> response, MIWSettings miwSettings, String oldSummaryCredentialId) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION));
