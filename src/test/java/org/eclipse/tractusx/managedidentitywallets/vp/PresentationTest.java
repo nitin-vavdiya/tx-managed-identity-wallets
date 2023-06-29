@@ -86,7 +86,7 @@ class PresentationTest {
     void validateVPAssJsonLd400() throws JsonProcessingException {
         //create VP
         String bpn = UUID.randomUUID().toString();
-        String audience = "smartSense";
+        String audience = "CompanyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
 
@@ -102,7 +102,7 @@ class PresentationTest {
     @Test
     void validateVPAsJwt() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException {
         String bpn = UUID.randomUUID().toString();
-        String audience = "smartSense";
+        String audience = "CompanyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
 
@@ -127,7 +127,7 @@ class PresentationTest {
     void validateVPAsJwtWithInvalidSignatureAndInValidAudienceAndExpiryDateValidation() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
         //create VP
         String bpn = UUID.randomUUID().toString();
-        String audience = "smartSense";
+        String audience = "CompanyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
 
@@ -156,7 +156,7 @@ class PresentationTest {
     void validateVPAsJwtWithValidAudienceAndDateValidation() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException {
         //create VP
         String bpn = UUID.randomUUID().toString();
-        String audience = "smartSense";
+        String audience = "CompanyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
 
@@ -183,7 +183,7 @@ class PresentationTest {
     void createPresentationAsJWT201() throws JsonProcessingException, ParseException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
-        String audience = "smartSense";
+        String audience = "CompanyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.CREATED.value());
         Assertions.assertNotNull(vpResponse.getBody());
@@ -240,7 +240,7 @@ class PresentationTest {
 
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
 
-        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "smartSense");
+        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "CompanyA");
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.NOT_FOUND.value());
     }
 
@@ -268,7 +268,7 @@ class PresentationTest {
 
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
 
-        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "smartSense");
+        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "CompanyA");
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.BAD_REQUEST.value());
     }
 
